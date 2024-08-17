@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothManager
+import android.bluetooth.le.BluetoothLeScanner
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
 import android.bluetooth.le.ScanSettings
@@ -22,7 +23,7 @@ class BLEActivity : AppCompatActivity() {
     private lateinit var bluetoothAdapter: BluetoothAdapter
     private var bluetoothGatt: BluetoothGatt? = null
     private lateinit var scanCallback: ScanCallback
-    val bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
+    lateinit var bluetoothLeScanner: BluetoothLeScanner
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,6 +33,8 @@ class BLEActivity : AppCompatActivity() {
 
         val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         bluetoothAdapter = bluetoothManager.adapter
+
+        bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
 
         binding.btnScan.setOnClickListener {
             scanDevice()

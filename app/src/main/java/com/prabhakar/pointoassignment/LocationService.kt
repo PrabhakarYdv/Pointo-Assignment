@@ -86,6 +86,7 @@ class LocationService : Service() {
 
     private fun getNotification(): Notification {
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentTitle("Location Update")
             .setContentText("Latitude: ${location?.latitude} | Longitude: ${location?.longitude}")
             .setSubText("Latitude: ${location?.latitude} | Longitude: ${location?.longitude}")

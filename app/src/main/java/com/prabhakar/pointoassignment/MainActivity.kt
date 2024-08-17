@@ -169,7 +169,7 @@ class MainActivity : AppCompatActivity() {
             if (grantResults.isEmpty() && grantResults.all {
                     it == PackageManager.PERMISSION_GRANTED
                 }) {
-                Toast.makeText(this, "All Permission Granted", Toast.LENGTH_SHORT)
+                Toast.makeText(this, "All Permission Granted", Toast.LENGTH_SHORT).show()
             }
         }
     }

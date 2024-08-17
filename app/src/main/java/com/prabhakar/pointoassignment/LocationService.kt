@@ -88,10 +88,12 @@ class LocationService : Service() {
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("Location Update")
             .setContentText("Latitude: ${location?.latitude} | Longitude: ${location?.longitude}")
+            .setSubText("Latitude: ${location?.latitude} | Longitude: ${location?.longitude}")
             .setOngoing(true)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            notification.setChannelId(CHANNEL_ID)
-        }
+            .setChannelId(CHANNEL_ID)
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//            notification.setChannelId(CHANNEL_ID)
+//        }
         return notification.build()
 
     }

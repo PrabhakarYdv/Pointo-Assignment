@@ -4,6 +4,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -14,6 +15,10 @@ import org.greenrobot.eventbus.Subscribe
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private var service: Intent? = null
+
+    companion object {
+        const val REQUEST_CODE = 10001
+    }
 
     private val backgroundLocationPermission =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) {
@@ -53,12 +58,16 @@ class MainActivity : AppCompatActivity() {
         service = Intent(this, LocationService::class.java)
 
         binding.btnStart.setOnClickListener {
-            checkPermissions()
+            checkLocationPermissions()
+        }
+
+        binding.btnBLE.setOnClickListener {
+            checkBluetoothPermission()
         }
 
     }
 
-    private fun checkPermissions() {
+    private fun checkLocationPermissions() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             if (ActivityCompat.checkSelfPermission(
                     this,
@@ -83,7 +92,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     @Subscribe
-     fun receiveLocationEvent(event: LocationEvent) {
+    fun receiveLocationEvent(event: LocationEvent) {
         binding.apply {
             latitude.text = "Latitude : ${event.latitude}"
             longitude.text = "Longitude : ${event.longitude}"
@@ -103,6 +112,65 @@ class MainActivity : AppCompatActivity() {
         stopService(service)
         if (EventBus.getDefault().isRegistered(this)) {
             EventBus.getDefault().unregister(this)
+        }
+    }
+
+    private fun checkBluetoothPermission() {
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                android.Manifest.permission.BLUETOOTH
+            ) != PackageManager.PERMISSION_GRANTED ||
+            ActivityCompat.checkSelfPermission(
+                this,
+                android.Manifest.permission.BLUETOOTH_ADMIN
+            ) != PackageManager.PERMISSION_GRANTED ||
+            ActivityCompat.checkSelfPermission(
+                this,
+                android.Manifest.permission.BLUETOOTH_SCAN
+            ) != PackageManager.PERMISSION_GRANTED ||
+            ActivityCompat.checkSelfPermission(
+                this,
+                android.Manifest.permission.BLUETOOTH_CONNECT
+            ) != PackageManager.PERMISSION_GRANTED
+
+        ) {
+            requestBluetoothPermissions()
+        } else {
+            startActivity(Intent(this, BLEActivity::class.java))
+        }
+    }
+
+
+    private fun requestBluetoothPermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(
+                    android.Manifest.permission.BLUETOOTH,
+                    android.Manifest.permission.BLUETOOTH_SCAN,
+                    android.Manifest.permission.BLUETOOTH_CONNECT,
+                    android.Manifest.permission.BLUETOOTH_ADMIN,
+                    android.Manifest.permission.ACCESS_FINE_LOCATION
+                ),
+                REQUEST_CODE
+            )
+
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (requestCode == REQUEST_CODE) {
+            if (grantResults.isEmpty() && grantResults.all {
+                    it == PackageManager.PERMISSION_GRANTED
+                }) {
+                Toast.makeText(this, "All Permission Granted", Toast.LENGTH_SHORT)
+            }
         }
     }
 

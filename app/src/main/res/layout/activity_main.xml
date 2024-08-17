@@ -43,4 +43,18 @@
         android:textStyle="bold"
         app:cornerRadius="10dp" />
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnBLE"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="50dp"
+        android:backgroundTint="#FF0000"
+        android:paddingHorizontal="50dp"
+        android:text="BLE"
+        android:textColor="#FFFFFF"
+        android:textSize="20dp"
+        android:textStyle="bold"
+        app:cornerRadius="10dp" />
+
 </LinearLayout>

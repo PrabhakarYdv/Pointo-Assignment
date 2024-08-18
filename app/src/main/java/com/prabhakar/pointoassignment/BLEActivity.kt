@@ -89,7 +89,14 @@ class BLEActivity : AppCompatActivity() {
 
         requestPermissions()
         binding.btnScan.setOnClickListener {
-            requestPermissions()
+            if (ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.BLUETOOTH_SCAN
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+
+                requestPermissions()
+            }
             startScanningForDevices()
         }
     }

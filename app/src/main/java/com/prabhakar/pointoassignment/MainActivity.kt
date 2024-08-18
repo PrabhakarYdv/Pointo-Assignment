@@ -1,13 +1,25 @@
 package com.prabhakar.pointoassignment
 
+import android.app.Activity
+import android.content.Context
 import android.content.Intent
+import android.content.IntentSender
 import android.content.pm.PackageManager
+import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import com.google.android.gms.common.api.ResolvableApiException
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.LocationSettingsRequest
+import com.google.android.gms.location.LocationSettingsResponse
+import com.google.android.gms.location.Priority
+import com.google.android.gms.location.SettingsClient
+import com.google.android.gms.tasks.Task
 import com.prabhakar.pointoassignment.databinding.ActivityMainBinding
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
@@ -18,6 +30,8 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         const val REQUEST_CODE = 10001
+        const val REQUEST_CHECK_SETTINGS = 10004
+
     }
 
     private val backgroundLocationPermission =
@@ -57,12 +71,16 @@ class MainActivity : AppCompatActivity() {
 
         service = Intent(this, LocationService::class.java)
 
+        if (!isLocationEnabled(this)) {
+            enableGPS(this)
+        }
+        checkBluetoothPermission()
         binding.btnStart.setOnClickListener {
             checkLocationPermissions()
         }
 
         binding.btnBLE.setOnClickListener {
-            checkBluetoothPermission()
+            startActivity(Intent(this, BLEActivity::class.java))
         }
 
     }
@@ -136,7 +154,7 @@ class MainActivity : AppCompatActivity() {
         ) {
             requestBluetoothPermissions()
         } else {
-            startActivity(Intent(this, BLEActivity::class.java))
+//            startActivity(Intent(this, BLEActivity::class.java))
         }
     }
 
@@ -170,6 +188,39 @@ class MainActivity : AppCompatActivity() {
                     it == PackageManager.PERMISSION_GRANTED
                 }) {
                 Toast.makeText(this, "All Permission Granted", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun isLocationEnabled(context: Context): Boolean {
+        val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
+                locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+    }
+
+    fun enableGPS(activity: Activity) {
+        val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 1000)
+            .build()
+
+        val builder = LocationSettingsRequest.Builder()
+            .addLocationRequest(locationRequest)
+
+        val settingsClient: SettingsClient = LocationServices.getSettingsClient(activity)
+        val task: Task<LocationSettingsResponse> =
+            settingsClient.checkLocationSettings(builder.build())
+
+        task.addOnSuccessListener { locationSettingsResponse ->
+            // All location settings are satisfied
+            // You can proceed with location requests
+        }
+
+        task.addOnFailureListener { exception ->
+            if (exception is ResolvableApiException) {
+                try {
+                    exception.startResolutionForResult(activity, REQUEST_CHECK_SETTINGS)
+                } catch (sendEx: IntentSender.SendIntentException) {
+                    // Ignore the error.
+                }
             }
         }
     }
